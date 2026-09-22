@@ -1,0 +1,175 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{{ battle.name }}</title>
+    <link rel="stylesheet" href="{% static 'combat/css/style.css' %}">
+</head>
+
+
+<body>
+<header class="header">
+   <h1 >{{ battle.name}}</h1>
+
+    {% if battle.is_finished %}
+        <h2 class="battle-state">Бой завершен❌</h2>
+    {% else %}
+        <h2 class="battle-state">Бой активен✅</h2>
+    {% endif %} 
+
+    
+</header>
+
+<hr>
+
+    <div class="map-name">
+        <h3>карта: {{ battle.map.name}} -
+        {{battle.map.width}} x {{battle.map.height}}</h3>
+    </div>
+
+
+<hr>
+
+<div class="battle-layout" data-current-turn-id = "{{battle.current_turn_id|default:'' }}" data-restart-url="{% url 'restart_battle' battle.id %}">
+
+    <section class="battle-sidebar">
+        <h2>Игроки</h2>
+
+        {% for entity in players %}
+            {% include "combat/includes/entity_card.html" %}
+            <hr>
+        {%empty%}
+            <p>В этом бою пока нет игроков</p>
+
+        {%endfor%}
+
+        <h2>Враги</h2>
+
+        {% for entity in enemies %}
+            {% include "combat/includes/entity_card.html" %}
+            <hr>
+        {%empty%}
+            <p>В этом бою пока нет врагов</p>
+
+        {%endfor%}
+
+        <h2>Препядствия</h2>
+
+        {% for obstacle in obstacles %}
+            <div class="obstacle-card">
+                <strong>Препядствие: {{ obstacle.name }}</strong>
+
+                <p>Кородинаты: ( {{obstacle.x}} , {{obstacle.y}} )</p>
+                <p>Блокирует движение: {{obstacle.blocks_movement}}</p>
+                <p>Блокирует стрельбу: {{obstacle.blocks_shooting}}</p>
+            </div>
+            <hr>
+        {%empty%}
+            <p>В этом бою пока нет препядствий</p>
+
+        {%endfor%}
+    </section>
+    <main class="battle-map-panel">
+        <div class="turn-panel">
+            {% if battle.current_turn %}
+                <p>
+                    Сейчас ход :
+                        <strong id = "current-turn-name">
+                            {{battle.current_turn.name}}
+                        </strong>
+                </p>
+            {% else %}
+                <p>
+                        <strong id = current-turn-name>
+                            Текущий Ход не назначен 
+                        </strong>
+                </p>
+            {% endif %}
+
+            <button 
+                type="button"
+                id="end-turn-button" 
+                class="action-button turn-button" 
+                data-end-turn-url="{% url 'end_turn' battle.id %}"
+            >
+                Закончить ход
+            </button>
+
+            <p id="turn-error" class="error"></p>
+        </div>
+        <div class="battle-wrapper">
+
+            <div
+                class="grid-layer"
+                style="grid-template-columns: repeat({{ battle.map.width }}, 100px);
+                grid-template-rows: repeat({{battle.map.height}},100px);"
+            >
+                {% for y in rows %}
+                    {% for x in columns %}
+                        <div class="cell" data-x="{{x}}" data-y="{{y}}"></div>
+                    {%endfor%}
+                {%endfor%}    
+            </div>
+
+            <div
+                class="object-layer "
+                style="grid-template-columns: repeat({{ battle.map.width }}, 100px);
+                grid-template-rows: repeat({{battle.map.height}},100px);"
+            >
+                {% for entity in entities %}
+                    <div class="entity{% if entity.hp <= 0 %} dead{%endif%} entity-{{entity.entity_type}}" data-entity-id="{{entity.id}}"
+                        style="
+                                grid-column: {{entity.x|add:1}} ;
+                                grid-row: {{entity.y|add:1}} ;
+                            "
+                        data-move-url="{% url 'move_entity' entity.id %}"
+                        data-shoot-url="{% url 'shoot_entity' entity.id %}"
+                        data-x = "{{entity.x}}"
+                        data-y = "{{entity.y}}"
+                        data-is-dead="{% if entity.hp <= 0 %}true{% else %}false{% endif %}"
+                    >
+                        {{entity.name}}
+                    </div>
+                {%endfor%}
+
+                {% for obstacle in obstacles %}
+                    <div class="obstacle" 
+                        style="
+                            grid-column: {{obstacle.x|add:1}} ;
+                            grid-row: {{obstacle.y|add:1}} ;
+                        "
+                        data-x ="{{obstacle.x}}"
+                        data-y ="{{obstacle.y}}"
+                        data-blocks-movement = "{{obstacle.blocks_movement}}"
+                    >
+                        {{obstacle.name}}
+                    </div>
+                {%endfor%}
+            </div>
+            <div class="effects-layer"></div>
+        </div>
+    </main>
+    <section class="battle-log">
+        <h2>Журнал боя</h2>
+        <div class="battle-log-list">
+            {% for log in battle.logs.all %}
+                <div class="battle-log-item battle-log-{{log.action_type}}">
+                    {{log.message}}
+                </div>
+            {%endfor%}
+        </div>
+    </section>
+
+</div>
+
+<script src="{% static 'combat/js/api.js' %}"></script>
+<script src="{% static 'combat/js/animations.js' %}"></script>
+<script src="{% static 'combat/js/ui.js' %}"></script>
+<script src="{% static 'combat/js/battle.js' %}"></script>
+
+
+</body>
+
+</html>

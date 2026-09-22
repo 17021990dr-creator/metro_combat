@@ -1,0 +1,117 @@
+<div class="entity-card{% if entity.hp <= 0 %} dead{%endif%}"
+    id="entity-card-{{entity.id}}"
+    data-is-dead="{% if entity.hp <= 0 %}true{% else %}false{% endif %}">
+                <strong class="entity-card-title">Персонаж: {{ entity.name }}</strong>
+                <p>Тип персонажа:{{entity.get_entity_type_display}} </p>
+
+                <p>
+                    HP:
+                    <span id="entity-hp-{{ entity.id }}">{{ entity.hp }}</span> /{{entity.max_hp}}
+                </p>
+                {% if entity.weapon %}
+                    <p>
+                        Оружие: {{ entity.weapon }}
+                    </p>
+                    <p>
+                        Состояние оружия: <span id="state-weapon-{{entity.id}}">{% if entity.weapon_jammed %} ЗАКЛИНЕНО {%else%} в норме {%endif%} </span>
+                    </p>
+
+                    <p>
+                        Количество патронов:
+                        <span id="entity-ammo-{{ entity.id }}">
+                            {{ entity.ammo }}
+                        </span>
+                        / {{ entity.weapon.magazine_size }}
+                    </p>
+                {% else %}
+                    <p>Оружие: отсутствует</p>
+                    <p>Патроны: —</p>
+                {% endif %}
+                <div class="entity-actions">
+                    <div class="action-point main-action{% if entity.main_actions <= 0 %} spent{% endif %}">
+                        <span class="action-label">Основное</span>
+
+                        <strong
+                            class="action-value"
+                            id="main-actions-{{ entity.id }}"
+                        >
+                            {{ entity.main_actions }}
+                        </strong>
+                    </div>
+
+                    <div class="action-point bonus-action{% if entity.bonus_actions <= 0 %} spent {%endif%}">
+                        <span class="action-label">Бонусное</span>
+
+                        <strong
+                            class="action-value"
+                            id="bonus-actions-{{ entity.id }}"
+                        >
+                            {{ entity.bonus_actions }}
+                        </strong>
+                    </div>
+                </div>
+
+                <p>Кородинаты: ( <span id = "entity-coordinates-{{ entity.id }}">{{entity.x}} , {{entity.y}}</span> )</p>
+
+                <hr>
+
+                <form class="action-form move-form" method="post" action="{% url 'move_entity' entity.id %}" >
+                    {% csrf_token %}
+
+                    <div class="coordinates-row">
+                        <label>
+                            Новый x :
+                                <input type="number" name="new_x"  required>
+                        </label>
+
+                        <label>
+                            Новый y :
+                                <input type="number" name="new_y"  required>
+                        </label>
+                    </div>
+
+                    <button class="action-button move-button" type = "submit">Переместить сущность</button>
+
+                </form>
+                <p class="error move-error"></p>
+                <hr>
+
+                <form 
+                    class="action-form damage-form"
+                    method="post" 
+                    action="{% url 'damage_entity' entity.id %}">
+                    {% csrf_token %}
+                    <p><input type="number" name="damage" min="1" required></p>
+                    <button class="action-button damage-button" type="submit">
+                        Нанести урон
+                    </button>
+                </form>
+                <p class="error damage-error"></p>
+
+                <hr>
+
+                <form class="action-form heal-form" method="post" action="{% url 'heal_entity' entity.id %}">
+                    {% csrf_token %}
+                    <p><input type="number" name="heal" min="1" required></p>
+                    <button class="action-button heal-button" type="submit">
+                        Вылечить
+                    </button>
+                </form>
+                <p class=" error heal-error"></p>
+                <div class="shoot-buttons">
+                    <button type="button" class="action-button fire-mode-button shoot-button" data-shooter-id="{{entity.id}}" data-fire-mode="normal">
+                        Стрелять 
+                    </button>
+                    <button type="button" class="action-button fire-mode-button overdrive-button" data-shooter-id="{{entity.id}}" data-fire-mode="overdrive">
+                        Разгон
+                    </button>
+                </div>
+                <p>Режим стрельбы:  <span id="fire-mode-{{entity.id}}">не выбран</span></p>
+
+                <button type="button" class="action-button reload-button" data-entity-id="{{entity.id}}" data-reload-url="{% url 'reload_ammo' entity.id %}">
+                    Перезарядить
+                </button>
+                <button type="button" class="action-button unjam-button" data-entity-id="{{entity.id}}" data-unjam-url="{% url 'unjam_weapon' entity.id %}">
+                    Расклинить
+                </button>
+            </div> 
