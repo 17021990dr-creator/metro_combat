@@ -221,6 +221,7 @@ entityElements.forEach(function (entityElement){
             if(entityElement.dataset.isDead === "true"){
                 return;
             }
+            
 
             if(currentAction === "shoot"){
                 if(!entityElement.classList.contains("entity-targetable")){
@@ -296,6 +297,13 @@ entityElements.forEach(function (entityElement){
                 alert("Сейчас ход другой сущности");
                 return;
             }
+            const objectLayer = document.querySelector(".object-layer");
+
+            if(objectLayer.classList.contains("map-editor-active")){
+                alert("Сейчас открыт редактор карты");
+                return;
+            }
+            
             
             clearSelectedEntity();
             
@@ -454,20 +462,37 @@ function highlightAvailableCells(entityElement) {
     }
 
 
-function isCellBlockedByObstacle(cellX, cellY){
-        const obstacles = document.querySelectorAll(".obstacle");
-        for(const obstacle of obstacles){
-            const obstacleX = Number(obstacle.dataset.x);
-            const obstacleY = Number(obstacle.dataset.y);
-            const blocksMovement = obstacle.dataset.blocksMovement === "True";
-            if (obstacleX === cellX && obstacleY === cellY && blocksMovement){
-                return true;
-            }
+function isCellBlockedByObstacle(x, y) {
+    const obstacles = document.querySelectorAll(".obstacle");
+    
+    for (const obstacle of obstacles) {
+        const obstacleX = Number(obstacle.dataset.x);
+        const obstacleY = Number(obstacle.dataset.y);
+
+        const obstacleWidth = Number(obstacle.dataset.width);
+        const obstacleHeight = Number(obstacle.dataset.height);
+
+        const blocksMovement =
+            obstacle.dataset.blocksMovement === "True";
+
+        if (!blocksMovement) {
+            continue;
         }
+        const insideX =
+            obstacleX <= x &&
+            x < obstacleX + obstacleWidth;
 
-        return false;
+        const insideY =
+            obstacleY <= y &&
+            y < obstacleY + obstacleHeight;
 
-    };
+        if (insideX && insideY) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 
 function isCellOccupiedByEntity  (cellX, cellY){

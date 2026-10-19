@@ -13,6 +13,67 @@ body{
 .map-name{
     padding-left:16px ;
 }
+.map-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 12px 16px;
+    gap: 20px;
+
+    background: #252525;
+    border-radius: 8px;
+}
+
+
+.map-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.map-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+
+.map-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+
+.map-size {
+    padding: 4px 8px;
+
+    background: #3a3a3a;
+    border-radius: 5px;
+
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+
+.map-controls {
+    display: flex;
+    align-items: center;
+}
+
+
+.map-editor-panel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+
+.hidden {
+    display: none;
+}
 
 .battle-layout{
     display: flex;
@@ -117,6 +178,19 @@ body{
     transition:transform 0.15s, outline 0.15s;
 }
 
+.map-editor-button{
+    background-color: #584f60;
+}
+.add-obstacle-button{
+    background-color: #584f60;
+}
+.delete-obstacle-button{
+    background-color: #8e2d42;
+}
+.exit-map-editor-button{
+    background-color: #5f2a2a;
+}
+
 .move-button{
     background-color: #2563eb;
 }
@@ -188,6 +262,14 @@ body{
     justify-items:center;
     align-items:center;
 }
+.map-editor-delete-active .obstacle{
+    pointer-events: auto;
+    cursor: pointer;
+}
+.map-editor-delete-active .obstacle:hover{
+    outline: 3px solid red;
+    opacity: 0.7;
+}
 
 .cell{
     width: 100px;
@@ -203,6 +285,9 @@ body{
     transition:
         background-color 0.15s,
         filter 0.15s;
+}
+.cell.obstacle-preview {
+    background-color: rgba(150, 150, 150, 0.5);
 }
     
 
@@ -276,13 +361,19 @@ body{
 .obstacle{
 
     pointer-events: none;
+    
+    width:auto;
+    height: auto;
 
-    width: 90px;
-    height: 90px;
     margin: 5px;
+
+    align-self: stretch;
+    justify-self: stretch;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     z-index: 2;
     background-color: grey;
 }

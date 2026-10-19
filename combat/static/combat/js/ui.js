@@ -211,3 +211,44 @@ function showBattleResult(winner){
             window.location.reload();
         });
     }
+
+function addObstacleToMap(obstacle){
+    const objectLayer = document.querySelector(".object-layer");
+    if(!objectLayer){
+        return;
+    }
+  
+    const obstacleElement = document.createElement("div");
+
+    obstacleElement.classList.add("obstacle");
+    obstacleElement.dataset.obstacleId = obstacle.id;
+    obstacleElement.dataset.x =obstacle.x;
+    obstacleElement.dataset.y =obstacle.y;
+    obstacleElement.dataset.width=obstacle.width;
+    obstacleElement.dataset.height=obstacle.height;
+    
+    
+    if(obstacle.blocks_movement){
+
+        obstacleElement.dataset.blocksMovement = "True";
+    }else{
+        obstacleElement.dataset.blocksMovement = "False";
+    }
+    
+
+    obstacleElement.style.gridColumn = `${obstacle.x + 1} /span ${obstacle.width}`
+    obstacleElement.style.gridRow = `${obstacle.y + 1} /span ${obstacle.height}`
+
+    obstacleElement.textContent = obstacle.name;
+    objectLayer.append(obstacleElement);
+}
+
+function removeObstacleFromMap(obstacleId){
+    const obstacleElement = document.querySelector(`.obstacle[data-obstacle-id="${obstacleId}"]`);
+
+    if (!obstacleElement){
+        return;
+    }
+
+    obstacleElement.remove();
+}

@@ -89,12 +89,22 @@ class Obstacle (models.Model):
     name = models.CharField(max_length=100)
     x = models.PositiveIntegerField(default=0)
     y = models.PositiveIntegerField(default=0)
+    width =models.PositiveIntegerField(default=1)
+    height =models.PositiveIntegerField(default=1)
 
     blocks_movement = models.BooleanField(default=True)
     blocks_shooting = models.BooleanField(default=True)
 
+    def occupies_cell(self, x, y):
+        return (
+            self.x <= x < self.x + self.width
+            and
+            self.y <= y < self.y + self.height
+        )
+    
     def __str__(self):
         return self.name
+    
 
 class BattleLog(models.Model):
     battle = models.ForeignKey(Battle, on_delete=models.CASCADE, related_name="logs")

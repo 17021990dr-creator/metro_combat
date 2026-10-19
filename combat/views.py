@@ -146,11 +146,17 @@ def move_entity(request, entity_id):
             {"error": "Эта клетка уже занята другой сущностью"},
             status = 400
         )
-    if entity.battle.obstacles.filter( x = new_x, y = new_y, blocks_movement = True).exists():
-        return JsonResponse(
-            {"error": "на этой клетке стоит непроходимое препятствие"},
-            status=400
-        )
+    movement_obstacles = entity.battle.obstacles.filter(
+    blocks_movement=True
+)
+
+    for obstacle in movement_obstacles:
+        if obstacle.occupies_cell(new_x, new_y):
+            return JsonResponse(
+                {"error": "На этой клетке стоит непроходимое препятствие"},
+                status=400,
+            )
+        
     if not remove_action_points(entity, "bonus"):
                 return JsonResponse(
                     {"error": "Отсутсвует очко дополнительного действия"},
@@ -703,3 +709,69 @@ def unjam_weapon(request, entity_id):
                     "message":log.message,
                 }
     })
+
+
+def create_obstacle(request, battle_id):
+     battle = get_object_or_404(Battle, id = battle_id)
+     if request.method != "POST":
+                 return JsonResponse (
+                     {"error":"запрос должен быть POST"},
+                     status = 405,
+                 )
+     try:
+          x = int(request.POST['x'])
+          y = int(request.POST['y'])
+          width = int(request.POST['width'])
+          height = int(request.POST['height'])
+     except(KeyError, ValueError):
+          return JsonResponse(
+            {"error": "Некорректные данные препятствия"},
+            status=400,
+        )
+     if width <=0 or height <=0:
+          return JsonResponse(
+            {"error": "Размер препятствия должен быть больше нуля"},
+            status=400,
+        )
+     if(x <0 or y < 0 or x + width > battle.map.width or y + height > battle.map.height):
+          return JsonResponse(
+            {"error": "Препятствие выходит за границы карты"},
+            status=400,
+        )
+     obstacle = Obstacle.objects.create(
+            battle = battle,
+            name = "Стена",
+            x = x,
+            y = y,
+            width =width,
+            height = height,
+            blocks_movement=True,
+            blocks_shooting=True,
+     )
+
+     return JsonResponse({
+        "success": True,
+        "obstacle": {
+            "id": obstacle.id,
+            "name": obstacle.name,
+            "x": obstacle.x,
+            "y": obstacle.y,
+            "width": obstacle.width,
+            "height": obstacle.height,
+            "blocks_movement": obstacle.blocks_movement,
+            "blocks_shooting": obstacle.blocks_shooting,
+        }
+    })
+
+def delete_obstacle(request, obstacle_id):
+     obstacle = get_object_or_404(Obstacle, id = obstacle_id)
+     if request.method != "POST":
+                      return JsonResponse (
+                          {"error":"запрос должен быть POST"},
+                          status = 405,
+                      )
+     obstacle.delete()
+     return JsonResponse({
+          "success":True,
+          "obstacle_id":obstacle_id,
+     })

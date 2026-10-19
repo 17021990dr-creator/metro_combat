@@ -7,6 +7,9 @@
     <title>{{ battle.name }}</title>
     <link rel="stylesheet" href="{% static 'combat/css/style.css' %}">
 </head>
+<form class="csrf-form" style="display: none;">
+    {% csrf_token %}
+</form>
 
 
 <body>
@@ -24,10 +27,64 @@
 
 <hr>
 
-    <div class="map-name">
-        <h3>карта: {{ battle.map.name}} -
-        {{battle.map.width}} x {{battle.map.height}}</h3>
+
+    <div class="map-panel">
+
+        <div class="map-info">
+            <span class="map-label">Карта</span>
+
+            <span class="map-title">
+                {{ battle.map.name }}
+            </span>
+
+            <span class="map-size">
+                {{ battle.map.width }} × {{ battle.map.height }}
+            </span>
+        </div>
+
+        <div class="map-controls">
+
+            <button
+                type="button"
+                id="map-editor-button"
+                class="action-button map-editor-button"
+            >
+                Редактор карты
+            </button>
+
+            <div class="map-editor-panel hidden">
+
+                <button
+                    type="button"
+                    id="add-obstacle-button"
+                    class="action-button add-obstacle-button"
+                >
+                    Добавить препятствие
+                </button>
+
+                <button
+                    type="button"
+                    id="delete-obstacle-button"
+                    class="action-button delete-obstacle-button"
+                >
+                    Удалить препятствие
+                </button>
+
+                <button
+                    type="button"
+                    id="exit-map-editor-button"
+                    class="action-button exit-map-editor-button"
+                >
+                    Закрыть редактор
+                </button>
+
+            </div>
+
+        </div>
+
     </div>
+
+<hr>
 
 
 <hr>
@@ -114,9 +171,11 @@
             </div>
 
             <div
-                class="object-layer "
+                class="object-layer"
                 style="grid-template-columns: repeat({{ battle.map.width }}, 100px);
                 grid-template-rows: repeat({{battle.map.height}},100px);"
+                data-create-obstacle-url ="{%url 'create_obstacle' battle.id%}"
+                data-delete-obstacle-url ="/obstacles/"
             >
                 {% for entity in entities %}
                     <div class="entity{% if entity.hp <= 0 %} dead{%endif%} entity-{{entity.entity_type}}" data-entity-id="{{entity.id}}"
@@ -137,11 +196,14 @@
                 {% for obstacle in obstacles %}
                     <div class="obstacle" 
                         style="
-                            grid-column: {{obstacle.x|add:1}} ;
-                            grid-row: {{obstacle.y|add:1}} ;
+                            grid-column: {{obstacle.x|add:1}} /span {{obstacle.width}};
+                            grid-row: {{obstacle.y|add:1}} /span {{obstacle.height}};
                         "
-                        data-x ="{{obstacle.x}}"
-                        data-y ="{{obstacle.y}}"
+                        data-obstacle-id = "{{ obstacle.id }}"
+                        data-x ="{{ obstacle.x }}"
+                        data-y ="{{ obstacle.y }}"
+                        data-width="{{ obstacle.width }}"
+                        data-height="{{ obstacle.height }}"
                         data-blocks-movement = "{{obstacle.blocks_movement}}"
                     >
                         {{obstacle.name}}
@@ -168,6 +230,7 @@
 <script src="{% static 'combat/js/animations.js' %}"></script>
 <script src="{% static 'combat/js/ui.js' %}"></script>
 <script src="{% static 'combat/js/battle.js' %}"></script>
+<script src="{% static 'combat/js/map_editor.js' %}"></script>
 
 
 </body>
